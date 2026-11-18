@@ -1,0 +1,44 @@
+/* All colours, spacing and fonts in one place. Change a value here and
+   the whole app follows. */
+:root {
+  /* Brand */
+  --color-accent: #f0a500;
+  --color-accent-hover: #d99500;
+  --color-accent-ink: #1d1a14;
+
+  /* Surfaces */
+  --color-bg: #f5f3ef;
+  --color-surface: #ffffff;
+  --color-input: #f4f2ee;
+  --color-input-disabled: #eceae5;
+  --color-border: #e2dfd8;
+  --color-border-strong: #cfcac0;
+
+  /* Text */
+  --color-text: #1f1c17;
+  --color-muted: #6b655c;
+  --color-placeholder: #8f897f;
+
+  /* Feedback */
+  --color-danger: #b4442e;
+  --color-danger-bg: #fbeae6;
+  --color-success: #2f7a3e;
+  --color-success-bg: #e6f3e8;
+  --color-info-bg: #fff4d6;
+  --color-focus: #1f5fbf;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius: 8px;
+  --radius-lg: 12px;
+  --page-max: 1360px;
+
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}

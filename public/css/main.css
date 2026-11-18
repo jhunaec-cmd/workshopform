@@ -1,0 +1,815 @@
+/* =========================================================
+   AEC Workshop - styles
+   Mobile-first: the base rules are for phones. The @media
+   (min-width: ...) blocks further down add tablet/PC layouts.
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Hidden on screen but still read out by screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Clear keyboard focus ring everywhere */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  margin-right: auto;
+  min-width: 0;
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.brand-badge {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  padding: 0 var(--space-2);
+  border-radius: 4px;
+}
+
+.brand-sub {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+/* Phones: logo + account button on the first row, the nav buttons
+   share the full second row. (order changes the visual order only.) */
+.main-nav {
+  order: 3;
+  width: 100%;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main-nav li {
+  flex: 1;
+}
+
+.main-nav .btn {
+  width: 100%;
+  padding: 0 var(--space-2);
+}
+
+/* User menu: a native <details> dropdown - keyboard accessible for free */
+.user-menu {
+  position: relative;
+}
+
+.user-menu summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-weight: 500;
+}
+
+.user-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.user-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-accent-ink);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.user-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  min-width: 220px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: var(--space-2);
+  display: grid;
+  gap: var(--space-1);
+}
+
+.user-menu-panel p {
+  margin: 0;
+  padding: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.user-menu-panel a,
+.user-menu-panel button {
+  display: block;
+  text-align: left;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.user-menu-panel a:hover,
+.user-menu-panel button:hover {
+  background: var(--color-bg);
+}
+
+/* ---------- Page layout ---------- */
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-4);
+  padding-bottom: var(--space-6);
+}
+
+.page:focus {
+  outline: none;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.page-title .mono {
+  font-family: var(--font-mono);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.card-title {
+  margin: 0 0 var(--space-4);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.loading,
+.empty {
+  color: var(--color-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+/* ---------- Form fields ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr; /* phones: one column */
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.field.span-all {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.req {
+  color: var(--color-danger);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-input);
+  color: var(--color-text);
+  /* 16px stops iPhones from zooming in when you tap a field */
+  font: 500 16px/1.3 var(--font-sans);
+}
+
+textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-placeholder);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+}
+
+input[readonly] {
+  background: var(--color-input-disabled);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--color-input-disabled);
+  color: var(--color-text);
+  opacity: 1;
+  -webkit-text-fill-color: var(--color-text);
+}
+
+/* Keep placeholder hints faint on locked jobs so they don't look like real data */
+input:disabled::placeholder,
+textarea:disabled::placeholder {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+input[type="checkbox"] {
+  width: 26px;
+  height: 26px;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.field.has-error input,
+.field.has-error textarea {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+/* Lets the whole locked form sit in one <fieldset disabled> without the
+   browser's default fieldset border. */
+.plain-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: 500 1rem var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--color-bg);
+}
+
+.btn-primary,
+.main-nav a[aria-current="page"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btn-dark {
+  background: var(--color-accent-ink);
+  border-color: var(--color-accent-ink);
+  color: #fff;
+}
+
+.btn-dark:hover {
+  background: #3a352c;
+}
+
+.btn-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background: var(--color-danger-bg);
+}
+
+.btn-small {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  font-size: 0.9rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+/* ---------- Messages ---------- */
+.form-error {
+  color: var(--color-danger);
+  font-weight: 600;
+  margin: 0;
+}
+
+.form-error:empty {
+  display: none;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+  background: var(--color-info-bg);
+  border: 1px solid #f0d58a;
+}
+
+.notice-success {
+  background: var(--color-success-bg);
+  border-color: #b6d9bd;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  transform: translate(-50%, 150%);
+  max-width: calc(100% - 2 * var(--space-4));
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-accent-ink);
+  color: #fff;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, visibility 0.25s;
+  visibility: hidden; /* fully hidden until a message is shown */
+  z-index: 50;
+}
+
+.toast.show {
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.toast.error {
+  background: var(--color-danger);
+}
+
+/* ---------- Status badges (one colour per status, by list position) ---------- */
+.badge {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #ece9e3;
+  color: var(--color-text);
+}
+
+.badge-s0 { background: #e3ecfa; color: #1f4f99; }
+.badge-s1 { background: #fff1cc; color: #7a5300; }
+.badge-s2 { background: #efe6fa; color: #5b2f99; }
+.badge-s3 { background: #dff3f1; color: #145f58; }
+.badge-s4 { background: #e2f3e5; color: #22663a; }
+.badge-s5 { background: #e9e7e3; color: #4f4a42; }
+.badge-s6 { background: #fbe4df; color: #8f2f1d; }
+.badge-locked { background: var(--color-accent-ink); color: #fff; }
+
+/* ---------- Procedure checklist ----------
+   Phones: every row becomes a small card (no sideways scrolling).
+   Tablet/PC (see media query below): a normal table like the paper form. */
+.checklist {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.checklist thead {
+  display: none;
+}
+
+.checklist tbody,
+.checklist tr,
+.checklist td {
+  display: block;
+}
+
+.checklist tr {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  grid-template-areas:
+    "no   name done"
+    "date date date"
+    "rem  rem  rem";
+  gap: var(--space-2) var(--space-2);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+}
+
+.checklist tr.is-done {
+  background: #fffaf0;
+  border-color: #f0d58a;
+}
+
+.checklist .c-no { grid-area: no; color: var(--color-muted); font-family: var(--font-mono); }
+.checklist .c-name { grid-area: name; font-weight: 500; }
+.checklist .c-done { grid-area: done; }
+.checklist .c-date { grid-area: date; }
+.checklist .c-rem { grid-area: rem; }
+
+/* ---------- Job records list ---------- */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.result-count {
+  margin: 0 0 var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.job-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.job-item {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.job-item:hover {
+  border-color: var(--color-accent);
+  background: #fffcf4;
+}
+
+.job-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.job-no {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.job-customer {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.job-unit,
+.job-meta {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.progress-bar {
+  width: 70px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+}
+
+/* ---------- Activity log ---------- */
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.history li {
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--color-accent);
+}
+
+.history time {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* ---------- Users table ---------- */
+.table-wrap {
+  overflow-x: auto; /* only this box scrolls sideways on small phones, never the page */
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.data-table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.inactive td {
+  color: var(--color-muted);
+}
+
+/* ---------- Login / setup ---------- */
+.auth-wrap {
+  max-width: 420px;
+  margin: var(--space-6) auto;
+}
+
+.auth-wrap .card {
+  padding: var(--space-5);
+}
+
+.auth-wrap h1 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.4rem;
+}
+
+.auth-wrap p.lead {
+  margin: 0 0 var(--space-5);
+  color: var(--color-muted);
+}
+
+.auth-wrap form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.auth-wrap .btn {
+  width: 100%;
+}
+
+/* =========================================================
+   Tablet (600px and wider)
+   ========================================================= */
+@media (min-width: 600px) {
+  .page {
+    padding: var(--space-5);
+  }
+
+  .card {
+    padding: var(--space-5);
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filters {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  /* Checklist cards: date and remarks side by side */
+  .checklist tr {
+    grid-template-columns: 2rem 12rem 1fr auto;
+    grid-template-areas:
+      "no   name name done"
+      ".    date rem  rem";
+  }
+
+  .job-item {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+
+/* =========================================================
+   Tablet landscape / PC (900px and wider)
+   ========================================================= */
+@media (min-width: 900px) {
+  .header-inner {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  /* PC: everything back on one row - logo left, nav + account right */
+  .main-nav {
+    order: 0;
+    width: auto;
+  }
+
+  .main-nav .btn {
+    padding: 0 var(--space-4);
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Checklist goes back to a real table, like the paper form */
+  .checklist thead { display: table-header-group; }
+  .checklist tbody { display: table-row-group; }
+  .checklist tr { display: table-row; padding: 0; border: 0; margin: 0; }
+  .checklist td { display: table-cell; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+  .checklist tr.is-done td { background: #fffaf0; }
+
+  .checklist th {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    text-align: left;
+    padding: var(--space-3);
+    font-size: 0.9rem;
+  }
+
+  .checklist th:first-child { border-top-left-radius: var(--radius); font-family: var(--font-mono); }
+  .checklist th:last-child { border-top-right-radius: var(--radius); }
+  .checklist .c-no { width: 3.5rem; }
+  .checklist .c-name { width: 30%; }
+  .checklist .c-done { width: 4rem; text-align: center; }
+  .checklist .c-date { width: 13rem; }
+}
+
+/* =========================================================
+   Print (Ctrl+P on a job) - just the form, no app chrome
+   ========================================================= */
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .app-header,
+  .form-actions,
+  .no-print,
+  .toast { display: none !important; }
+  .page { padding: 0; max-width: none; }
+  .card { border: 1px solid #999; break-inside: avoid; padding: 10px; margin-bottom: 10px; }
+  input, select, textarea { border: 0; border-bottom: 1px solid #999; border-radius: 0; background: #fff !important; min-height: 0; padding: 4px 0; font-size: 12px; }
+  textarea { resize: none; min-height: 50px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .checklist thead { display: table-header-group; }
+  .checklist tbody { display: table-row-group; }
+  .checklist tr { display: table-row; border: 0; padding: 0; }
+  .checklist td, .checklist th { display: table-cell; border: 1px solid #999; padding: 4px 6px; text-align: left; }
+}

@@ -1,0 +1,23 @@
+# Render "Blueprint": tells Render how to build and run this app.
+# Render reads this file when you choose New > Blueprint in the dashboard.
+services:
+  - type: web
+    name: aec-workshop
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install --omit=dev   # skip dev-only tools (icon generator)
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Render makes up a long random secret for login tokens - nobody needs to type it.
+      - key: JWT_SECRET
+        generateValue: true
+      # Render's own disk is wiped on every redeploy, so the data lives in Turso.
+      # "sync: false" = Render asks you to paste these in during setup.
+      - key: DB_URL
+        sync: false
+      - key: DB_AUTH_TOKEN
+        sync: false

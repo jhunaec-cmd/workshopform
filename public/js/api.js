@@ -1,0 +1,88 @@
+// Small helpers for talking to the server. They attach the login token,
+// turn the reply into JSON, and handle "you've been logged out".
+
+const TOKEN_KEY = "aecws_token";
+const USER_KEY = "aecws_user";
+
+// localStorage can throw in some private-browsing modes - never let that crash the app.
+const store = {
+  get: (key) => {
+    try { return localStorage.getItem(key); } catch { return null; }
+  },
+  set: (key, value) => {
+    try { localStorage.setItem(key, value); } catch { /* ignore */ }
+  },
+  remove: (key) => {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+  },
+};
+
+export const getToken = () => store.get(TOKEN_KEY);
+
+export const getUser = () => {
+  try {
+    return JSON.parse(store.get(USER_KEY)) || null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveSession = (token, user) => {
+  store.set(TOKEN_KEY, token);
+  store.set(USER_KEY, JSON.stringify(user));
+};
+
+export const saveUser = (user) => store.set(USER_KEY, JSON.stringify(user));
+
+export const clearSession = () => {
+  store.remove(TOKEN_KEY);
+  store.remove(USER_KEY);
+  metaCache = null;
+};
+
+const readJson = async (res) => {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
+
+// The one function every screen uses to call the server.
+// Example: await api("/jobs", { method: "POST", body: { ... } })
+export async function api(path, { method = "GET", body } = {}) {
+  let res;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error("Can't reach the server. Check your internet / Wi-Fi connection and try again.");
+  }
+
+  const data = await readJson(res);
+
+  // Token expired or account deactivated -> back to the login screen.
+  // (Not for the login request itself - it shows its own message.)
+  if (res.status === 401 && !path.startsWith("/auth/login")) {
+    clearSession();
+    location.hash = "#/login";
+  }
+  if (data?.code === "MUST_CHANGE_PASSWORD") {
+    location.hash = "#/change-password";
+  }
+  if (!res.ok) throw new Error(data?.error || "Something went wrong. Please try again.");
+  return data;
+}
+
+// Job statuses + procedure steps come from the server once, then are reused.
+let metaCache = null;
+export const getMeta = async () => {
+  metaCache ??= await api("/meta");
+  return metaCache;
+};
