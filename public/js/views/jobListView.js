@@ -1,13 +1,17 @@
 // Job records: every saved job, newest first, with live search and a status filter.
-import { api, getMeta } from "../api.js";
-import { escapeHtml, formatDate, statusBadge, debounce } from "../utils.js";
+import { api, apiDownload, getMeta, getUser } from "../api.js";
+import { escapeHtml, formatDate, statusBadge, debounce, showToast } from "../utils.js";
 
 export async function renderJobList(container) {
   const meta = await getMeta();
+  // Only admins see the export button. (The server checks this too, so
+  // hiding the button is just for tidiness - it is not the real protection.)
+  const isAdmin = getUser()?.role === "admin";
 
   container.innerHTML = `
     <div class="page-head">
       <h1 class="page-title">Job records</h1>
+      ${isAdmin ? '<button type="button" class="btn" id="export-btn">Export to Excel</button>' : ""}
       <a class="btn btn-primary" href="#/jobs/new">+ New job</a>
     </div>
     <section class="card">
@@ -97,6 +101,22 @@ export async function renderJobList(container) {
       })
       .join("");
   };
+
+  // Exports exactly what the search box + status filter are showing.
+  const exportBtn = container.querySelector("#export-btn");
+  exportBtn?.addEventListener("click", async () => {
+    exportBtn.disabled = true;
+    exportBtn.textContent = "Preparing…";
+    try {
+      await apiDownload(`/jobs/export?${new URLSearchParams({ q: q.value.trim(), status: status.value })}`);
+      showToast("Excel file downloaded.");
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = "Export to Excel";
+    }
+  });
 
   container.querySelector("form").addEventListener("submit", (e) => e.preventDefault());
   q.addEventListener("input", debounce(load, 250));

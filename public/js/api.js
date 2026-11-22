@@ -110,6 +110,30 @@ export async function apiBlobUrl(path) {
   return URL.createObjectURL(await res.blob());
 }
 
+// Downloads a file from the server and saves it to the device. The file
+// name comes from the server's Content-Disposition header.
+export async function apiDownload(path) {
+  let res;
+  try {
+    res = await fetch(`/api${path}`, { headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {} });
+  } catch {
+    throw new Error("Can't reach the server. Check your connection and try again.");
+  }
+  if (!res.ok) {
+    const data = await readJson(res);
+    throw new Error(data?.error || "Download failed. Please try again.");
+  }
+  const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") || "")?.[1] || "download";
+  const url = URL.createObjectURL(await res.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 // Job statuses + procedure steps come from the server once, then are reused.
 let metaCache = null;
 export const getMeta = async () => {

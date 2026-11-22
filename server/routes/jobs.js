@@ -1,5 +1,6 @@
 // Workshop jobs: list/search, view, create, edit, check+lock, reopen, delete.
 const express = require("express");
+const ExcelJS = require("exceljs");
 
 const db = require("../db/connection");
 const asyncHandler = require("../utils/asyncHandler");
@@ -116,25 +117,106 @@ async function loadJob(req, res) {
 
 // ---------- Routes ----------
 
+// Turns ?q=...&status=... into a SQL "WHERE ..." piece. Shared by the job
+// list and the Excel export, so both always search the same way.
+function buildFilter(query) {
+  const q = String(query.q || "").trim();
+  const status = String(query.status || "");
+  const where = [];
+  const args = [];
+
+  if (q) {
+    const like = `%${q}%`;
+    where.push(`(customer_name LIKE ? OR contact_no LIKE ? OR unit_model LIKE ? OR serial_no LIKE ?
+      OR job_ref_no LIKE ? OR br_no LIKE ? OR technician LIKE ? OR ('${FORM_PREFIX}' || printf('%04d', id)) LIKE ?)`);
+    args.push(like, like, like, like, like, like, like, like);
+  }
+  if (status) {
+    where.push("job_status = ?");
+    args.push(status);
+  }
+  return { where, args };
+}
+
+// GET /api/jobs/export?q=...&status=...   (admin only -> downloads an .xlsx file)
+// Must be declared BEFORE "/:id", otherwise "export" would be read as a job id.
+router.get(
+  "/export",
+  requireRole("admin"),
+  asyncHandler(async (req, res) => {
+    const { where, args } = buildFilter(req.query);
+    const rows = await db.all(
+      `SELECT j.*, (SELECT COUNT(*) FROM job_photos p WHERE p.job_id = j.id) AS photo_count
+       FROM jobs j ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+       ORDER BY j.id DESC LIMIT 5000`,
+      ...args
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "AEC Workshop";
+    const sheet = workbook.addWorksheet("Jobs", { views: [{ state: "frozen", ySplit: 1, xSplit: 1 }] });
+
+    // [heading, width, value from a job]
+    const columns = [
+      ["Form No.", 18, (j) => j.form_no],
+      ["Date received", 14, (j) => j.date_received],
+      ["Customer", 26, (j) => j.customer_name],
+      ["Contact no.", 16, (j) => j.contact_no],
+      ["Unit brand / model", 26, (j) => j.unit_model],
+      ["Serial no.", 18, (j) => j.serial_no],
+      ["Job / Ref. no.", 16, (j) => j.job_ref_no],
+      ["BR no.", 12, (j) => j.br_no],
+      ["Received by", 18, (j) => j.received_by],
+      ["Technician", 18, (j) => j.technician],
+      ["Status", 28, (j) => j.job_status],
+      ["Steps done", 11, (j) => `${j.checklist.filter((s) => s.done).length}/${PROCEDURES.length}`],
+      ["Complaint", 40, (j) => j.complaint],
+      ["Findings", 40, (j) => j.findings],
+      ["Action / update", 40, (j) => j.action_update],
+      ["Quotation", 30, (j) => j.quotation],
+      // One column per procedure step: the date it was done ("Done" if no date), else blank.
+      ...PROCEDURES.map((name, i) => [
+        `${i + 1}. ${name}`,
+        22,
+        (j) => (j.checklist[i]?.done ? j.checklist[i].date || "Done" : ""),
+      ]),
+      ["Photos", 8, (j) => Number(j.photo_count)],
+      ["Prepared by", 18, (j) => j.prepared_by],
+      ["Checked by", 18, (j) => j.checked_by || ""],
+      ["Checked at (UTC)", 20, (j) => j.checked_at || ""],
+      ["Created (UTC)", 20, (j) => j.created_at],
+      ["Last updated (UTC)", 20, (j) => j.updated_at],
+    ];
+
+    sheet.columns = columns.map(([header, width]) => ({ header, width }));
+    const header = sheet.getRow(1);
+    header.font = { bold: true };
+    header.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0A500" } };
+    header.alignment = { vertical: "middle", wrapText: true };
+
+    for (const row of rows) {
+      const job = toJob(row);
+      const added = sheet.addRow(columns.map(([, , get]) => get({ ...job, photo_count: row.photo_count })));
+      added.alignment = { vertical: "top", wrapText: true };
+    }
+    sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: columns.length } };
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.set({
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition": `attachment; filename="AEC-Workshop-Jobs-${stamp}.xlsx"`,
+      "Cache-Control": "no-store",
+    });
+    await workbook.xlsx.write(res);
+    res.end();
+  })
+);
+
 // GET /api/jobs?q=search&status=In%20workshop
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const q = String(req.query.q || "").trim();
-    const status = String(req.query.status || "");
-    const where = [];
-    const args = [];
-
-    if (q) {
-      const like = `%${q}%`;
-      where.push(`(customer_name LIKE ? OR contact_no LIKE ? OR unit_model LIKE ? OR serial_no LIKE ?
-        OR job_ref_no LIKE ? OR br_no LIKE ? OR technician LIKE ? OR ('${FORM_PREFIX}' || printf('%04d', id)) LIKE ?)`);
-      args.push(like, like, like, like, like, like, like, like);
-    }
-    if (status) {
-      where.push("job_status = ?");
-      args.push(status);
-    }
+    const { where, args } = buildFilter(req.query);
 
     const rows = await db.all(
       `SELECT id, date_received, customer_name, contact_no, unit_model, serial_no, technician,
