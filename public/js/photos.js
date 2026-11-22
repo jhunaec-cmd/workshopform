@@ -77,7 +77,7 @@ export function wirePhotos(container, job, locked) {
         (p, i) => `
         <li class="photo-item" data-id="${p.id}">
           <button type="button" class="photo-thumb" data-open="${p.id}" aria-label="Open photo ${i + 1}">
-            <img alt="Photo ${i + 1} of the unit" loading="lazy" />
+            <img alt="Photo ${i + 1} of the unit" />
           </button>
           <span class="photo-meta">${escapeHtml(p.uploaded_by)} · ${formatDateTime(p.created_at)}</span>
           ${locked ? "" : `<button type="button" class="btn btn-danger btn-small no-print" data-remove="${p.id}">Remove</button>`}

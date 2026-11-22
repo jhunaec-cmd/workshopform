@@ -117,7 +117,7 @@ export async function renderJobForm(container, { id } = {}) {
       <div class="form-actions">
         ${locked ? "" : '<button type="submit" class="btn btn-primary" data-action="save">Save job</button>'}
         ${job ? "" : '<button type="button" class="btn" data-action="clear">Clear form</button>'}
-        ${job ? '<button type="button" class="btn" data-action="print">Print</button>' : ""}
+        ${job ? '<button type="button" class="btn" data-action="print">Save as PDF / Print</button>' : ""}
         ${job && isAdmin && !locked ? '<button type="button" class="btn btn-dark" data-action="check">Mark as checked &amp; lock</button>' : ""}
         ${job && isAdmin && locked ? '<button type="button" class="btn" data-action="reopen">Reopen for editing</button>' : ""}
         ${job && isAdmin ? '<button type="button" class="btn btn-danger" data-action="delete">Delete job</button>' : ""}
@@ -257,7 +257,22 @@ function wireUp(container, { job, meta }) {
         go("#/jobs/new");
       }
 
-      if (action === "print") window.print();
+      if (action === "print") {
+        // Wait until every photo has finished loading, or it could be missing from the PDF.
+        // (Gives up after 5 seconds so the button can never get stuck.)
+        const pending = [...container.querySelectorAll(".photo-thumb img")]
+          .filter((img) => !img.complete)
+          .map((img) => new Promise((done) => { img.onload = img.onerror = done; }));
+        await Promise.race([Promise.all(pending), new Promise((done) => setTimeout(done, 5000))]);
+
+        // Browsers use the page title as the default PDF file name,
+        // so set it to something useful, then put it back afterwards.
+        const oldTitle = document.title;
+        const safe = `${job.form_no} - ${job.customer_name}`.replace(/[\\/:*?"<>|]/g, "-");
+        document.title = safe;
+        window.addEventListener("afterprint", () => (document.title = oldTitle), { once: true });
+        window.print();
+      }
 
       if (action === "check") {
         if (dirty) {

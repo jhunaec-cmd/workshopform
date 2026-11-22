@@ -797,6 +797,7 @@ input[type="checkbox"] {
    Print (Ctrl+P on a job) - just the form, no app chrome
    ========================================================= */
 @media print {
+  @page { size: A4; margin: 12mm; }
   body { background: #fff; font-size: 12px; }
   .app-header,
   .form-actions,
