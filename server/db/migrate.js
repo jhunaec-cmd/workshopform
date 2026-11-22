@@ -56,17 +56,6 @@ async function runMigrations() {
     );
     CREATE INDEX IF NOT EXISTS idx_history_job ON job_history (job_id);
 
-    -- Photos of the unit. The picture itself is stored in the database (a
-    -- BLOB) because Render's disk is wiped on every redeploy.
-    CREATE TABLE IF NOT EXISTS job_photos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      job_id INTEGER NOT NULL,
-      image BLOB NOT NULL,
-      uploaded_by TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_photos_job ON job_photos (job_id);
-
     -- Failed logins, used to block password guessing.
     CREATE TABLE IF NOT EXISTS login_attempts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

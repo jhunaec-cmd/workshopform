@@ -4,8 +4,6 @@
 import { api, getMeta, getUser } from "../api.js";
 import { escapeHtml, field, todayISO, formatDateTime, statusBadge, showToast } from "../utils.js";
 import { go, setDirtyCheck } from "../nav.js";
-import { photosSection, wirePhotos } from "../photos.js";
-
 // Every input the server saves (checklist is handled separately).
 const FIELDS = [
   "date_received", "customer_name", "contact_no", "unit_model", "serial_no", "job_ref_no",
@@ -95,8 +93,6 @@ export async function renderJobForm(container, { id } = {}) {
           </table>
         </section>
 
-        ${photosSection(job, locked)}
-
         <section class="card" aria-labelledby="h-signoff">
           <h2 class="card-title" id="h-signoff">Sign-off</h2>
           <div class="grid grid-2">
@@ -126,9 +122,7 @@ export async function renderJobForm(container, { id } = {}) {
 
     ${job ? historySection(job.history) : ""}`;
 
-  wireUp(container, { job, meta });
-  wirePhotos(container, job, locked);
-}
+  wireUp(container, { job, meta });}
 
 // One row of the procedure checklist. On phones CSS turns it into a small card.
 function checklistRow(name, i, step) {
@@ -258,13 +252,6 @@ function wireUp(container, { job, meta }) {
       }
 
       if (action === "print") {
-        // Wait until every photo has finished loading, or it could be missing from the PDF.
-        // (Gives up after 5 seconds so the button can never get stuck.)
-        const pending = [...container.querySelectorAll(".photo-thumb img")]
-          .filter((img) => !img.complete)
-          .map((img) => new Promise((done) => { img.onload = img.onerror = done; }));
-        await Promise.race([Promise.all(pending), new Promise((done) => setTimeout(done, 5000))]);
-
         // Browsers use the page title as the default PDF file name,
         // so set it to something useful, then put it back afterwards.
         const oldTitle = document.title;
