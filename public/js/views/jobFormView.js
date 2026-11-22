@@ -4,6 +4,7 @@
 import { api, getMeta, getUser } from "../api.js";
 import { escapeHtml, field, todayISO, formatDateTime, statusBadge, showToast } from "../utils.js";
 import { go, setDirtyCheck } from "../nav.js";
+import { photosSection, wirePhotos } from "../photos.js";
 
 // Every input the server saves (checklist is handled separately).
 const FIELDS = [
@@ -94,6 +95,8 @@ export async function renderJobForm(container, { id } = {}) {
           </table>
         </section>
 
+        ${photosSection(job, locked)}
+
         <section class="card" aria-labelledby="h-signoff">
           <h2 class="card-title" id="h-signoff">Sign-off</h2>
           <div class="grid grid-2">
@@ -124,6 +127,7 @@ export async function renderJobForm(container, { id } = {}) {
     ${job ? historySection(job.history) : ""}`;
 
   wireUp(container, { job, meta });
+  wirePhotos(container, job, locked);
 }
 
 // One row of the procedure checklist. On phones CSS turns it into a small card.

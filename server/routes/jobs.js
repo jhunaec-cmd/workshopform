@@ -165,7 +165,72 @@ router.get(
       "SELECT user_name, action, created_at FROM job_history WHERE job_id = ? ORDER BY id DESC",
       row.id
     );
-    res.json({ ...toJob(row), history });
+    // Only the photo ids - the pictures themselves load separately.
+    const photos = await db.all(
+      "SELECT id, uploaded_by, created_at FROM job_photos WHERE job_id = ? ORDER BY id",
+      row.id
+    );
+    res.json({ ...toJob(row), history, photos });
+  })
+);
+
+// ---------- Photos ----------
+const MAX_PHOTOS = 10;
+
+// The browser shrinks photos to ~200 KB before sending; 2 MB is a safety limit.
+// express.raw reads the request body as plain bytes (not JSON).
+const rawJpeg = express.raw({ type: "image/jpeg", limit: "2mb" });
+
+// A real JPEG always starts with the bytes FF D8 FF. Checking this stops
+// someone uploading a different kind of file pretending to be a photo.
+const isJpeg = (buf) => Buffer.isBuffer(buf) && buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
+
+router.post(
+  "/:id/photos",
+  rawJpeg,
+  asyncHandler(async (req, res) => {
+    const row = await loadJob(req, res);
+    if (!row) return;
+    if (row.checked_at) return res.status(403).json({ error: "This job is locked. An admin must reopen it first." });
+    if (!isJpeg(req.body)) return res.status(400).json({ error: "That file is not a valid photo (JPEG)." });
+
+    const { count } = await db.get("SELECT COUNT(*) AS count FROM job_photos WHERE job_id = ?", row.id);
+    if (Number(count) >= MAX_PHOTOS) {
+      return res.status(400).json({ error: `A job can have at most ${MAX_PHOTOS} photos.` });
+    }
+
+    const result = await db.run(
+      "INSERT INTO job_photos (job_id, image, uploaded_by) VALUES (?, ?, ?)",
+      row.id,
+      req.body,
+      req.user.fullName
+    );
+    await addHistory(row.id, req.user, "Added a photo");
+    res.status(201).json({ id: result.lastInsertRowid });
+  })
+);
+
+router.get(
+  "/:id/photos/:photoId",
+  asyncHandler(async (req, res) => {
+    const photo = await db.get("SELECT image FROM job_photos WHERE id = ? AND job_id = ?", Number(req.params.photoId), Number(req.params.id));
+    if (!photo) return res.status(404).json({ error: "Photo not found." });
+    res.set({ "Content-Type": "image/jpeg", "X-Content-Type-Options": "nosniff", "Cache-Control": "private, max-age=86400" });
+    res.send(Buffer.from(photo.image));
+  })
+);
+
+router.delete(
+  "/:id/photos/:photoId",
+  asyncHandler(async (req, res) => {
+    const row = await loadJob(req, res);
+    if (!row) return;
+    if (row.checked_at) return res.status(403).json({ error: "This job is locked. An admin must reopen it first." });
+
+    const result = await db.run("DELETE FROM job_photos WHERE id = ? AND job_id = ?", Number(req.params.photoId), row.id);
+    if (result.changes === 0) return res.status(404).json({ error: "Photo not found." });
+    await addHistory(row.id, req.user, "Removed a photo");
+    res.json({ ok: true });
   })
 );
 
@@ -273,6 +338,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const row = await loadJob(req, res);
     if (!row) return;
+    await db.run("DELETE FROM job_photos WHERE job_id = ?", row.id);
     await db.run("DELETE FROM job_history WHERE job_id = ?", row.id);
     await db.run("DELETE FROM jobs WHERE id = ?", row.id);
     res.json({ ok: true });

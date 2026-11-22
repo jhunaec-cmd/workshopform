@@ -80,6 +80,36 @@ export async function api(path, { method = "GET", body } = {}) {
   return data;
 }
 
+// Sends a file (a Blob) as the raw request body, e.g. a JPEG photo.
+export async function apiUpload(path, blob) {
+  let res;
+  try {
+    res = await fetch(`/api${path}`, {
+      method: "POST",
+      headers: { "Content-Type": blob.type, ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+      body: blob,
+    });
+  } catch {
+    throw new Error("Can't reach the server. Check your connection and try again.");
+  }
+  const data = await readJson(res);
+  if (res.status === 401) {
+    clearSession();
+    location.hash = "#/login";
+  }
+  if (!res.ok) throw new Error(data?.error || "Upload failed. Please try again.");
+  return data;
+}
+
+// Downloads a picture and returns a temporary URL an <img> can show.
+export async function apiBlobUrl(path) {
+  const res = await fetch(`/api${path}`, {
+    headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+  });
+  if (!res.ok) throw new Error("Could not load the photo.");
+  return URL.createObjectURL(await res.blob());
+}
+
 // Job statuses + procedure steps come from the server once, then are reused.
 let metaCache = null;
 export const getMeta = async () => {

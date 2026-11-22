@@ -813,3 +813,46 @@ input[type="checkbox"] {
   .checklist tr { display: table-row; border: 0; padding: 0; }
   .checklist td, .checklist th { display: table-cell; border: 1px solid #999; padding: 4px 6px; text-align: left; }
 }
+
+/* ---------- Photos ---------- */
+/* Mobile-first: 2 photos per row on phones, more as the screen grows. */
+.photo-grid {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+@media (min-width: 700px) {
+  .photo-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.photo-item { display: flex; flex-direction: column; gap: var(--space-1); }
+.photo-thumb {
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-input);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-meta { font-size: 0.8rem; color: var(--color-muted); }
+.photo-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.photo-dialog {
+  max-width: min(95vw, 1000px);
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-lg);
+}
+.photo-dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
+.photo-dialog img { display: block; max-width: 100%; max-height: 80vh; margin: 0 auto var(--space-3); }
+/* Keyboard users: show where focus is while the file input is visually hidden. */
+#photo-input:focus-visible + .hint,
+.photo-actions:focus-within .btn { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+@media print {
+  .photo-grid { grid-template-columns: repeat(3, 1fr); }
+  .photo-item { break-inside: avoid; }
+}
