@@ -113,7 +113,7 @@ export async function renderJobForm(container, { id } = {}) {
       <div class="form-actions">
         ${locked ? "" : '<button type="submit" class="btn btn-primary" data-action="save">Save job</button>'}
         ${job ? "" : '<button type="button" class="btn" data-action="clear">Clear form</button>'}
-        ${job ? '<button type="button" class="btn" data-action="print">Save as PDF / Print</button>' : ""}
+        ${job ? '<button type="button" class="btn" data-action="pdf">Save as PDF</button>' : ""}
         ${job && isAdmin && !locked ? '<button type="button" class="btn btn-dark" data-action="check">Mark as checked &amp; lock</button>' : ""}
         ${job && isAdmin && locked ? '<button type="button" class="btn" data-action="reopen">Reopen for editing</button>' : ""}
         ${job && isAdmin ? '<button type="button" class="btn btn-danger" data-action="delete">Delete job</button>' : ""}
@@ -251,7 +251,8 @@ function wireUp(container, { job, meta }) {
         go("#/jobs/new");
       }
 
-      if (action === "print") {
+      if (action === "pdf") {
+        // A browser saves a PDF through its print window: pick "Save as PDF" as the destination there.
         // Browsers use the page title as the default PDF file name,
         // so set it to something useful, then put it back afterwards.
         const oldTitle = document.title;
